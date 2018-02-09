@@ -20,7 +20,7 @@ In the future we would like to add:
 Getting Started
 ---------------
 
-Haut can be simply compiled using a C99-compliant compiler. There are no external dependencies. First of all, obtain the sources by  clone into the Git repository:
+Haut can simply be compiled using a C99-compliant compiler. There are no external dependencies. First of all, obtain the sources by  clone into the Git repository:
 
 ```
 git clone https://github.com/mickymuis/haut-html.git
