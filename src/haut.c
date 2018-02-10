@@ -277,7 +277,6 @@ clear_current_token( haut_t* p ) {
  *  Additionally, the lexer's next state may be modified (for example, if it was stored previously). */
 static inline void
 dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
-    size_t offset;
     switch( state ) {
         /* Public events */
         default:
