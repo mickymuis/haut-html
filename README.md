@@ -16,3 +16,14 @@ Currently Haut has near-complete support for all HTML5 language features, and:
 In the future we would like to add:
 * Support for character streaming (as opposed to operating on the whole buffer)
 * Character encodings other than UTF-8
+
+Getting Started
+---------------
+
+Haut can simply be compiled using a C99-compliant compiler. There are no external dependencies. First of all, obtain the sources by  clone into the Git repository:
+
+```
+git clone https://github.com/mickymuis/haut-html.git
+```
+
+Currently, only a Unix-style Makefile is provided and on Unix-like systems a simple `make` command will suffice. Furthermore, the `examples/` folder contains some simple demonstrations of how the library is used.
