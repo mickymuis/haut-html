@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "state.h"
+#include "entity.h"
 
 /* This struct contains the internal state of the parser
  * and is opaque to the user of the API */
@@ -369,14 +370,17 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
             char32_t entity = decode_entity( 
                     p->state->token_ptr.data + p->state->entity_token_offset, 
                     p->state->token_ptr.size - p->state->entity_token_offset );
-            strbuffer_t tmp;
-            u32toUTF8( &tmp, entity );
-            // Append the decoded entity to whatever token we were parsing
-            if( has_stored_token( p ) )
-                p->state->token_buffer.size =p->state->entity_token_offset;
-            strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
-            strbuffer_free( &tmp );
-            p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
+            if( entity != ENTITY_UNKNOWN ) { 
+                strbuffer_t tmp;
+                u32toUTF8( &tmp, entity );
+                // Append the decoded entity to whatever token we were parsing
+                if( has_stored_token( p ) )
+                    p->state->token_buffer.size =p->state->entity_token_offset;
+                strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
+                strbuffer_free( &tmp );
+                p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
+            } else
+                emit_error( p, ERROR_UNKNOWN_ENTITY );
             // Return the lexer to the token we were parsing before the entity was encountered
             *lexer_next_state = p->state->lexer_saved_state;
             set_token_chunk_begin( p, 1 );
@@ -391,7 +395,8 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
                 begin_token( p, 0 );
             break;
         case P_TOKEN_END:
-            end_token( p, 0 );
+            if( p->state->in_token )
+                end_token( p, 0 );
             break;
         case P_ATTRIBUTE_KEY:
             end_token( p, 0 );
