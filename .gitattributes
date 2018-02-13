@@ -1,6 +1,6 @@
 #sources
-*.c text
-*.h text
+*.c linguist-language=C
+*.h linguist-language=C
 
 # Compiled Object files
 *.slo binary
