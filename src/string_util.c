@@ -10,9 +10,44 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if not defined(_WIN32) || not defined(_WIN64) 
+#include <strings.h>
+#endif
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+bool 
+strfragment_cmp(strfragment_t* str1, const char* str2) {
+	return ( strncmp( str1->data, str2, str1->size ) == 0 );
+}
+
+bool 
+strfragment_ncmp(strfragment_t* str1, const char* str2, size_t len) {
+	return ( strncmp( str1->data, str2, MIN( len, str1->size ) ) == 0);
+}
+
+bool 
+strfragment_icmp(strfragment_t* str1, const char* str2) {
+#if defined(_WIN32) || defined(_WIN64) 
+	return ( _strnicmp( str1->data, str2, str1->size ) == 0 );
+#else
+	return ( strncasecmp( str1->data, str2, str1->size ) == 0 );
+#endif
+}
+
+bool 
+strfragment_nicmp(strfragment_t* str1, const char* str2, size_t len) {
+#if defined(_WIN32) || defined(_WIN64) 
+	return (_strnicmp(str1->data, str2, MIN(len, str1->size)) == 0);
+#else
+	return (strncasecmp(str1->data, str2, MIN( len, str1->size )) == 0);
+#endif
+}
+
+
 #define BLOCK_SIZE 64
 
-inline void
+void
 strbuffer_init( strbuffer_t* d ) {
     d->data =malloc( BLOCK_SIZE );
     d->data[0] =0;
@@ -20,13 +55,13 @@ strbuffer_init( strbuffer_t* d ) {
     d->capacity =BLOCK_SIZE;
 }
 
-inline void
+void
 strbuffer_free( strbuffer_t* d ) {
     free( d->data );
     d->size =0;
 }
 
-inline void 
+void 
 strbuffer_clear( strbuffer_t* d ) {
     if( d->capacity > BLOCK_SIZE ) {
         d->data =realloc( d->data, BLOCK_SIZE );
@@ -37,7 +72,7 @@ strbuffer_clear( strbuffer_t* d ) {
     d->data[0] =0;
 }
 
-inline size_t
+size_t
 strbuffer_reserve( strbuffer_t* d, size_t add ) {
     if( d->size + add + 1 > d->capacity ) {
         size_t newcap =((d->size + add + 1) / BLOCK_SIZE + 1) * BLOCK_SIZE;
@@ -72,7 +107,7 @@ strbuffer_copyFragment( strbuffer_t* d, size_t offset, strfragment_t* str ) {
     memcpy( d->data+offset, str->data, str->size );
 }
 
-inline void 
+void 
 strbuffer_append( strbuffer_t* d, const char* str, size_t len ) {
 
     strbuffer_reserve( d, len );
@@ -81,14 +116,14 @@ strbuffer_append( strbuffer_t* d, const char* str, size_t len ) {
     d->data[d->size] =0;
 }
 
-inline void 
+void 
 strbuffer_swap( strbuffer_t* str1, strbuffer_t* str2 ) {
     strbuffer_t tmp =*str1;
     *str1 =*str2;
     *str2 =tmp;
 }
 
-inline strfragment_t 
+strfragment_t 
 strbuffer_to_fragment( strbuffer_t str ) {
     strfragment_t frag;
     frag.data =str.data;
@@ -96,7 +131,8 @@ strbuffer_to_fragment( strbuffer_t str ) {
     return frag;
 }
 
-bool u32toUTF8( strbuffer_t* d, char32_t c ) {
+bool
+u32toUTF8( strbuffer_t* d, char32_t c ) {
     // Unicode codepoints can either expand to 1, 2, 3 or 4 UTF-8 values
     int length =0;
     if( c < 0x80 ) {
@@ -118,7 +154,8 @@ bool u32toUTF8( strbuffer_t* d, char32_t c ) {
     return u32toUTF8_at( d, 0, c );
 }
 
-bool u32toUTF8_at( strbuffer_t* d, int offset, char32_t c ) {
+bool
+u32toUTF8_at( strbuffer_t* d, int offset, char32_t c ) {
     char* ptr = d->data;
 
     // Multi-byte sequences a made up of six-bit groups in the codepoint,

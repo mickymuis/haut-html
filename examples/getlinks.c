@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
 #include <sys/stat.h>
 #include <haut/haut.h>
 #include <haut/tag.h>
+#include <haut/string_util.h>
 
 /* Usage:
  * getlinks [html-file]
@@ -36,7 +36,7 @@ myAttribute( haut_t* p, strfragment_t* key, strfragment_t* value ) {
      */
     if( haut_currentElementTag( p ) == TAG_A ) {
         // So this is a link, now we're interested in the HREF attribute
-        if( strncasecmp( key->data, "href", key->size ) == 0 && value && value->data )
+        if( strfragment_icmp( key, "href" ) && value && value->data )
             printf( "%.*s\n", (int)value->size, value->data );
 
         /* Note that key and value are both char-pointer

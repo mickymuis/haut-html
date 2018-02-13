@@ -46,6 +46,10 @@ struct haut_state {
 
 //#define DEBUG_PRINT
 
+#if defined(_MSC_VER)
+#define inline __inline
+#endif
+
 void    
 default_document_begin_event     ( struct haut* p ){
 #ifdef DEBUG_PRINT

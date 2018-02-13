@@ -16,6 +16,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * An non-mutable structure to safely store base pointer plus total length 
@@ -24,6 +25,11 @@ typedef struct {
     const char* data;
     size_t size;
 } strfragment_t;
+
+bool strfragment_cmp( strfragment_t* str1, const char* str2 );
+bool strfragment_ncmp( strfragment_t* str1, const char* str2, size_t len );
+bool strfragment_icmp( strfragment_t* str1, const char* str2 );
+bool strfragment_nicmp( strfragment_t* str1, const char* str2, size_t len );
 
 /**
  * A mutable string type that supports growing
