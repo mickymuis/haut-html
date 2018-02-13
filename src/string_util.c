@@ -10,7 +10,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if not defined(_WIN32) || not defined(_WIN64) 
+#if defined(_WIN32) || defined(_WIN64) 
+#else
 #include <strings.h>
 #endif
 
