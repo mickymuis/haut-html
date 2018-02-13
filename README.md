@@ -10,20 +10,30 @@ Features
 Currently Haut has near-complete support for all HTML5 language features, and:
 * SAX-based (event-driven) API that is very easy to use
 * Very fast and small memory footprint
-* Resillient against mistakes in HTML-code
+* Resilient against mistakes in HTML-code
 * Support for all HTML5 elements, text nodes, attributes, DOCTYPE-sections, SCRIPT-sections, CDATA-sections, comments and character references.
 * Support for UTF-8 formatted input and UTF-8 compliant output
-In the future we would like to add:
-* Support for character streaming (as opposed to operating on the whole buffer)
-* Character encodings other than UTF-8
+* Parsing of partial data (chunks) or a the whole buffer at once
 
 Getting Started
 ---------------
 
-Haut can simply be compiled using a C99-compliant compiler. There are no external dependencies. First of all, obtain the sources by  clone into the Git repository:
+Haut can simply be compiled using a C99-compliant compiler (or MSVC >= 2013). There are no external dependencies. First of all, obtain the sources by  clone into the Git repository:
 
 ```
 git clone https://github.com/mickymuis/haut-html.git
 ```
 
-Currently, only a Unix-style Makefile is provided and on Unix-like systems a simple `make` command will suffice. Furthermore, the `examples/` folder contains some simple demonstrations of how the library is used.
+Currently, a simple Unix-style Makefile is provided and on Unix-like systems a simple `make` command will suffice. Furthermore, the `examples/` folder contains some simple demonstrations of how the library is used.
+There is also a Visual Studio (2013) solution included in the folder `visualc`.
+
+Finite State Machine
+--------------------
+
+While Haut is a very simple parser - it has only a handful functions and under 1000 lines of C-code - under the hood it uses another concept to define its behavior. Haut utilizes four different pure Finite State Machines to do 90% of its parsing. These FSMs are coded as tables in linear memory and need no branching or character comparisons, making it extremely fast. While there are already many FSM solutions available, Haut uses its own FSM-compiler called *fsm2array*. fsm2array is a very simplistic program that translates a simple syntax into C-style arrays. Normally these FSMs are precompiled in the `src/` directory but all the tools you need to work with them are provided in the `util` directory.
+
+Contributing
+------------
+
+Help me make Haut an awesome parsing by contributing to this project. You can send me bug reports and feedback through Github. Please also include the HTML-source that you used (if applicable).
+If you need pointers on testing or other forms of contributing please contact me.
