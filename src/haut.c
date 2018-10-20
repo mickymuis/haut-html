@@ -14,6 +14,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #include "state.h"
 #include "entity.h"
 
@@ -42,6 +43,8 @@ struct haut_state {
     // Current lexer state and its 'one-entry stack'
     int lexer_state;
     int lexer_saved_state;
+
+    jmp_buf read_current_char;
 };
 
 //#define DEBUG_PRINT
@@ -258,7 +261,7 @@ store_current_token( haut_t* p ) {
 
 /** Make a local copy of the data pointed to by attr_key_buffer in @p 
  *  This function is called when parsing an attribute and the key that has been parsed,
- *  needs to be saved - either if the chunk ends or and entity is encountered. */
+ *  needs to be saved - either if the chunk ends or an entity is encountered. */
 static inline void
 store_attr_key( haut_t* p ) { 
     strbuffer_clear( &p->state->attr_key_buffer );
@@ -281,7 +284,7 @@ clear_current_token( haut_t* p ) {
 /** Given the new state of the parser, performs the action corresponding to the semantics of that state,
  *  Additionally, the lexer's next state may be modified (for example, if it was stored previously). */
 static inline void
-dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
+dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
     switch( state ) {
         /* Public events */
         default:
@@ -353,27 +356,29 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
                 p->state->lexer_saved_state = L_INNERTEXT;
         case P_ENTITY_BEGIN:
             if( !p->state->in_token ) {
-                begin_token( p, 1 );
+                begin_token( p, 0 );
                 p->state->entity_token_offset =0;
             } else {
                 set_token_chunk_end( p, 0 );
                 store_current_token( p );       
                 p->state->entity_token_offset = p->state->token_buffer.size;
-                set_token_chunk_begin( p, 1 );
+                set_token_chunk_begin( p, 0 );
             }
             if( state != P_INNERTEXT_ENTITY_BEGIN )
                 p->state->lexer_saved_state = p->state->lexer_state;
             break;
 
         case P_ENTITY:
+            // Return the lexer to the token we were parsing before the entity was encountered
+            *next_lexer_state = p->state->lexer_saved_state;
             end_token( p, 0 );
-            /*fprintf( stderr, "DEBUG: entity token `%.*s' (%d)\n", 
+/*            fprintf( stderr, "DEBUG: entity token `%.*s' (%d)\n", 
                     p->state->token_ptr.size - p->state->entity_token_offset,
                     p->state->token_ptr.data + p->state->entity_token_offset,
                     p->state->token_ptr.size - p->state->entity_token_offset );*/
             char32_t entity = decode_entity( 
-                    p->state->token_ptr.data + p->state->entity_token_offset, 
-                    p->state->token_ptr.size - p->state->entity_token_offset );
+                    p->state->token_ptr.data + p->state->entity_token_offset + 1, 
+                    p->state->token_ptr.size - p->state->entity_token_offset - 1 );
             if( entity != ENTITY_UNKNOWN ) { 
                 strbuffer_t tmp;
                 u32toUTF8( &tmp, entity );
@@ -383,11 +388,31 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
                 strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
                 strbuffer_free( &tmp );
                 p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
-            } else
+                set_token_chunk_begin( p, 1 );
+            } else {
                 emit_error( p, ERROR_UNKNOWN_ENTITY );
-            // Return the lexer to the token we were parsing before the entity was encountered
-            *lexer_next_state = p->state->lexer_saved_state;
-            set_token_chunk_begin( p, 1 );
+                strbuffer_t tmp;
+                tmp.data =p->state->token_ptr.data + p->state->entity_token_offset;
+                tmp.size =p->state->token_ptr.size - p->state->entity_token_offset;
+
+                // Append the invalid entity-string to whatever token we were parsing
+                if( has_stored_token( p ) )
+                    p->state->token_buffer.size =p->state->entity_token_offset;
+                strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
+                p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
+                set_token_chunk_begin( p, 1 );
+            }
+
+            // Appearantly, due to errors in the HTML,
+            // we have consumed one too many characters from the input stream
+            if( entity == ENTITY_UNKNOWN || p->state->lexer_state == L_ENTITY_END_DIRTY ) {
+                set_token_chunk_begin( p, 0 );
+                p->state->lexer_state =*next_lexer_state;
+                // Jump back to the parser main loop, 
+                // causing the current character to be parsed again
+                longjmp( p->state->read_current_char, 0 );
+            }
+
             break;
 
         case P_ERROR:
@@ -414,7 +439,7 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
         case P_ELEMENT_END:
             if( p->state->last_tag == TAG_SCRIPT ) {
                 begin_token( p, 1 );
-                *lexer_next_state =L_SCRIPT;
+                *next_lexer_state =L_SCRIPT;
             }
             break;
         case P_VOID_ELEMENT_END:
@@ -423,13 +448,30 @@ dispatch_parser_action( haut_t* p, int state, int* lexer_next_state ) {
             p->events.script( p, &p->state->token_ptr );
             clear_current_token( p );
             break;
-        // These two are currently unused and reserved for future use.
+        case P_RESET_LEXER:
+           /* fprintf( stderr, "Reading %c again\n", current_char( p ) );
+            int tmp =*next_lexer_state;
+            *next_lexer_state = lexer_next_state( *next_lexer_state, current_char( p ) );
+            set_token_chunk_begin( p, 0 );
+
+            { 
+                const char* parser_state =parser_next_state( tmp, *next_lexer_state );
+
+                for( int k =0; k < 2; k++ )
+                    dispatch_parser_action( p, parser_state[k], next_lexer_state );
+            }*/
+        
+            break;
+        // These three are currently unused and reserved for future use.
         case P_SAVE_TOKEN:
             set_token_chunk_end( p, -1 );
             store_current_token( p );
             break;
         case P_SAVE_LEXER_STATE:
             p->state->lexer_saved_state = p->state->lexer_state;
+            break;
+        case P_RESTORE_LEXER_STATE:
+            *next_lexer_state = p->state->lexer_saved_state;
             break;
     }
 }
@@ -470,6 +512,9 @@ haut_parse( haut_t* p ) {
     const char *parser_state;
     
     while( !at_end( p ) ) {
+
+        setjmp( p->state->read_current_char );
+
         c =current_char( p );
         /* Insert the character into the lexer's FSM */
         next_lexer_state =lexer_next_state( p->state->lexer_state, c );

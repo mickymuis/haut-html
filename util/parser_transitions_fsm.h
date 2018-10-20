@@ -109,6 +109,7 @@ L_CDATA_RBRACKET2, L_ELEM_END   => { P_CDATA }
 
 // Entity
 L_ENTITY, L_ENTITY_END          => { P_ENTITY }
+L_ENTITY, L_ENTITY_END_DIRTY    => { P_ENTITY }
 
 //
 // Internal parser events

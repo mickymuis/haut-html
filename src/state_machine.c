@@ -103,5 +103,5 @@ decode_entity( const char* str, size_t len ) {
                 break;
         }
     }
-    return ENTITY_NONE;
+    return ENTITY_UNKNOWN;
 }

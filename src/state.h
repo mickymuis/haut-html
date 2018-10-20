@@ -84,6 +84,7 @@
 
 #define L_ENTITY                        45
 #define L_ENTITY_END                    59
+#define L_ENTITY_END_DIRTY              60
 
 /* Lexer states inside <script> elements */
 
@@ -105,7 +106,7 @@
 #define L_SCRIPT_P                              57
 #define L_SCRIPT_T                              58
 
-#define L_N_STATES                      60
+#define L_N_STATES                      61
 
 /* Parser states */
 
@@ -142,6 +143,8 @@
 
 // For future use
 #define P_SAVE_LEXER_STATE      22      /* On a rare occasion we need to store the lexer's state */
-#define P_SAVE_TOKEN            23      /* Save the current token to a separate buffer - we do this already in streaming mode */
+#define P_RESTORE_LEXER_STATE   23
+#define P_RESET_LEXER           24      /* Set the lexer state by looking at the current character (again) */
+#define P_SAVE_TOKEN            25      /* Save the current token to a separate buffer - we do this already in streaming mode */
 
 #endif

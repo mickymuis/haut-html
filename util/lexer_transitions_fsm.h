@@ -277,14 +277,15 @@ L_CDATA_RBRACKET2, '>'          => { L_ELEM_END }
 //
 
 // Characters references in text nodes 
-L_ENTITY, **                    => { L_ENTITY_END }
+L_ENTITY, **                    => { L_ENTITY_END_DIRTY }
 L_ENTITY, *aA                   => { L_ENTITY }
 L_ENTITY, ';'                   => { L_ENTITY_END }
 // We add this one to detect entities that are missing the trailing semi-colon
-L_ENTITY, *s                    => { L_ENTITY_END }
-L_ENTITY, '<'                   => { L_ENTITY_END }
+L_ENTITY, *s                    => { L_ENTITY_END_DIRTY }
+L_ENTITY, '<'                   => { L_ENTITY_END_DIRTY }
+L_ENTITY_END, **                => { L_ENTITY_END_DIRTY }
 
-L_ENTITY_END, **                => { L_ENTITY_END }
+L_ENTITY_END_DIRTY, **          => { L_ENTITY_END_DIRTY }
 
 //
 // Section 9 - Inside <script> and <style> elements
