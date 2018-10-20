@@ -43,8 +43,6 @@ struct haut_state {
     // Current lexer state and its 'one-entry stack'
     int lexer_state;
     int lexer_saved_state;
-
-    jmp_buf read_current_char;
 };
 
 //#define DEBUG_PRINT
@@ -283,7 +281,7 @@ clear_current_token( haut_t* p ) {
 
 /** Given the new state of the parser, performs the action corresponding to the semantics of that state,
  *  Additionally, the lexer's next state may be modified (for example, if it was stored previously). */
-static inline void
+static inline bool
 dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
     switch( state ) {
         /* Public events */
@@ -410,7 +408,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
                 p->state->lexer_state =*next_lexer_state;
                 // Jump back to the parser main loop, 
                 // causing the current character to be parsed again
-                longjmp( p->state->read_current_char, 0 );
+                return false;
             }
 
             break;
@@ -449,18 +447,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
             clear_current_token( p );
             break;
         case P_RESET_LEXER:
-           /* fprintf( stderr, "Reading %c again\n", current_char( p ) );
-            int tmp =*next_lexer_state;
-            *next_lexer_state = lexer_next_state( *next_lexer_state, current_char( p ) );
-            set_token_chunk_begin( p, 0 );
-
-            { 
-                const char* parser_state =parser_next_state( tmp, *next_lexer_state );
-
-                for( int k =0; k < 2; k++ )
-                    dispatch_parser_action( p, parser_state[k], next_lexer_state );
-            }*/
-        
+            return false; 
             break;
         // These three are currently unused and reserved for future use.
         case P_SAVE_TOKEN:
@@ -474,6 +461,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
             *next_lexer_state = p->state->lexer_saved_state;
             break;
     }
+    return true;
 }
 
 /* */
@@ -513,8 +501,7 @@ haut_parse( haut_t* p ) {
     
     while( !at_end( p ) ) {
 
-        setjmp( p->state->read_current_char );
-
+REREAD:
         c =current_char( p );
         /* Insert the character into the lexer's FSM */
         next_lexer_state =lexer_next_state( p->state->lexer_state, c );
@@ -525,8 +512,10 @@ haut_parse( haut_t* p ) {
         parser_state =parser_next_state( p->state->lexer_state, next_lexer_state );
 
         /* The parser FSM gives either zero, one or two new states that define serialized actions */
-        for( int k =0; k < 2; k++ )
-            dispatch_parser_action( p, parser_state[k], &next_lexer_state );
+        for( int k =0; k < 2; k++ ) {
+            if( !dispatch_parser_action( p, parser_state[k], &next_lexer_state ) )
+                goto REREAD;
+        }
         
         /* Lastly, make the lexer's next state current and advance the counters */
         p->state->lexer_state =next_lexer_state;
