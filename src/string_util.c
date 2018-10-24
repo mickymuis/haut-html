@@ -74,9 +74,14 @@ strbuffer_clear( strbuffer_t* d ) {
 }
 
 size_t
-strbuffer_reserve( strbuffer_t* d, size_t add ) {
-    if( d->size + add + 1 > d->capacity ) {
-        size_t newcap =((d->size + add + 1) / BLOCK_SIZE + 1) * BLOCK_SIZE;
+strbuffer_grow( strbuffer_t* d, size_t add ) {
+    return strbuffer_reserve( d, d->size + add );
+}
+
+size_t
+strbuffer_reserve( strbuffer_t* d, size_t total ) {
+    if( total + 1 > d->capacity ) {
+        size_t newcap =((total + 1) / BLOCK_SIZE + 1) * BLOCK_SIZE;
         d->data =realloc( d->data, newcap );
         assert( d->data != NULL );
         d->data[d->size] =0;
@@ -95,14 +100,14 @@ strbuffer_ncopy( strbuffer_t* d, size_t dest_offset, const strbuffer_t* src, siz
     if( src->capacity < src_offset + length )
         return;
     if( d->size <= dest_offset + length + 1 )
-        strbuffer_reserve( d, (dest_offset + length + 1) - d->size );
+        strbuffer_grow( d, (dest_offset + length + 1) - d->size );
     memcpy( d->data+dest_offset, src->data+src_offset, length );
 }
 
 void 
 strbuffer_copyFragment( strbuffer_t* d, size_t offset, strfragment_t* str ) {
     if( d->size <= offset + str->size + 1 ) {
-        strbuffer_reserve( d, (offset + str->size + 1) - d->size );
+        strbuffer_grow( d, (offset + str->size + 1) - d->size );
         d->size = offset + str->size;
     }
     memcpy( d->data+offset, str->data, str->size );
@@ -111,7 +116,7 @@ strbuffer_copyFragment( strbuffer_t* d, size_t offset, strfragment_t* str ) {
 void 
 strbuffer_append( strbuffer_t* d, const char* str, size_t len ) {
 
-    strbuffer_reserve( d, len );
+    strbuffer_grow( d, len );
     strncpy( d->data + d->size, str, len );
     d->size +=len;
     d->data[d->size] =0;

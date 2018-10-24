@@ -14,7 +14,6 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
-#include <setjmp.h>
 #include "state.h"
 #include "entity.h"
 

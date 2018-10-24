@@ -41,7 +41,8 @@ typedef struct {
 } strbuffer_t;
 
 /* We also add some rudimentary Unicode support. Therefore we must ensure that
- * char16_t and char32_t are properly defined. C11 does this for us, otherwise we define them here 
+ * char16_t and char32_t are properly defined. C11 does this for us, 
+ * otherwise we define them here 
  */
 
 #if __STDC_VERSION__ < 201112L
@@ -58,7 +59,9 @@ void strbuffer_free( strbuffer_t* d );
 
 void strbuffer_clear( strbuffer_t* d );
 
-size_t strbuffer_reserve( strbuffer_t* d, size_t add );
+size_t strbuffer_grow( strbuffer_t* d, size_t add );
+
+size_t strbuffer_reserve( strbuffer_t* d, size_t total );
 
 void strbuffer_copy( strbuffer_t* d, const strbuffer_t* src );
 
