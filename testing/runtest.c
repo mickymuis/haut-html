@@ -31,6 +31,7 @@ processFile( const char* filename, flags_t flags ) {
 
     test_t t;
     memset( &t, 0, sizeof(test_t) );
+    t.flags =flags;
     char*line =NULL;
     size_t read =0, len =0;
     char **dest =&(t.input_buf);
@@ -53,9 +54,19 @@ processFile( const char* filename, flags_t flags ) {
         *dest_size += read;
     }  
     free( line );
-//    printf( "First part:\n%.*s\nsecond part:\n%.*s\n", (int)html_size, html, (int)expect_size, expect );
 
-    bool passed =beginTest( &t, flags );
+    if( t.input_buf == NULL || t.input_size == 0  ) 
+        return true; // Nothing to do
+    if( flags.generate ) {
+    /* Instead of testing against given expectancies, 
+     * we generate expectancies given html input */
+        printf( "%.*sEXPECT\n", (int)t.input_size, t.input_buf );
+    } else if( t.expect_buf == NULL || t.expect_size == 0 ) {
+        fprintf( stderr, "ERROR: Malformed test-file\n" );
+        return false;    
+    }
+    
+    bool passed =beginTest( &t );
 
     free( t.input_buf ); free( t.expect_buf );
     return passed;
@@ -77,11 +88,13 @@ main( int argc, char** argv ) {
         else {
         // Everything else is treated as a filename
             bool result =processFile( argv[i], flags );
-            printf( "%s %s\n", RESULT_STRING( result ), argv[i] );
-            if( !result ) {
-                error =1;
-                if( flags.stop_on_error )
-                    break;
+            if( !flags.generate ) {
+                printf( "%s %s\n", RESULT_STRING( result ), argv[i] );
+                if( !result ) {
+                    error =1;
+                    if( flags.stop_on_error )
+                        break;
+                }
             }
         }
     }

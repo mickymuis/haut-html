@@ -28,6 +28,8 @@ typedef struct {
     char* expect_buf;
     size_t expect_size, expect_ptr;
 
+    flags_t flags;
+
     /* These variables are used internally by the test functions */
     jmp_buf return_on_mismatch;
     strbuffer_t output_buf;
@@ -38,6 +40,6 @@ typedef struct {
  * the parser's output against expect_buf.
  * Returns true if all expectations are met.*/
 bool
-beginTest( test_t* t, flags_t flags );
+beginTest( test_t* t );
 
 #endif

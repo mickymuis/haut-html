@@ -24,6 +24,13 @@ expect( haut_t* p, const char* fmt, ... ) {
     va_start( ap, fmt );
     test_t* t =(test_t*)p->userdata;
 
+    if( t->flags.generate ) {
+        /* Only generate expectations; simply print the output from the parser */
+        vprintf( fmt, ap );
+        va_end( ap );
+        return;
+    }
+
     /* First we compute the number of bytes we have to reserve for the output,
      * it can be at most as many bytes as the expectation */
     const char* expect =t->expect_buf + t->expect_ptr;
@@ -175,7 +182,7 @@ static const haut_event_handler_t TEST_EVENT_HANDLER = {
  * the parser's output against expect_buf.
  * Returns true if all expectations are met.*/
 bool
-beginTest( test_t* t, flags_t flags ) {
+beginTest( test_t* t ) {
     bool pass =true;
 
     haut_t p;
