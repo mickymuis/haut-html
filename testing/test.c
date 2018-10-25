@@ -66,11 +66,11 @@ expect( haut_t* p, const char* fmt, ... ) {
 
 void    
 test_document_begin_event     ( struct haut* p ){
-    fprintf( stderr, "Debug: document begin\n" );
+//    fprintf( stderr, "Debug: document begin\n" );
 }
 void            
 test_document_end_event       ( struct haut* p ){
-    fprintf( stderr, "Debug: document end\n" );
+//   fprintf( stderr, "Debug: document end\n" );
 }
 
 void            
@@ -146,7 +146,7 @@ test_script_event          ( struct haut* p, strfragment_t* text ){
 
 void            
 test_error_event           ( struct haut* p, haut_error_t err ){
-    printf( "Debug: Syntax error (%d) on line %d, column %d:\n", (int)err, 
+/*    printf( "Debug: Syntax error (%d) on line %d, column %d:\n", (int)err, 
             p->position.row, p->position.col );
 
     const int max_width = 20;
@@ -160,7 +160,7 @@ test_error_event           ( struct haut* p, haut_error_t err ){
     printf( "\t`%.*s%.*s'\n", before, (p->input + p->position.offset) - before, after, (p->input + p->position.offset));
     printf( "\t" );
     for( int i =0; i < before; i++ ) printf( " " );
-    printf( "^\n" );
+    printf( "^\n" );*/
 }
 
 /* Describes the event handler structure. We need to catch all events emitted. */
