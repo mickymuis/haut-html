@@ -319,7 +319,12 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
         
         case P_ATTRIBUTE_VOID:
             end_token( p, 0 );
-            p->events.attribute( p, &p->state->token_ptr, NULL );
+            // The attribute key may already have been stored
+            if( p->state->attr_key_ptr.data != NULL )
+                p->events.attribute( p, &p->state->attr_key_ptr, NULL );
+            // Otherwise we use the current token
+            else
+                p->events.attribute( p, &p->state->token_ptr, NULL );
             p->state->attr_key_ptr.data = NULL;
             clear_current_token( p );
             break;
@@ -361,7 +366,9 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
                 p->state->entity_token_offset = p->state->token_buffer.size;
                 set_token_chunk_begin( p, 0 );
             }
-            if( state != P_INNERTEXT_ENTITY_BEGIN )
+            if( p->state->lexer_state == L_ATTR_EQUALS )
+                p->state->lexer_saved_state = L_ATTR_VALUE;
+            else if( state != P_INNERTEXT_ENTITY_BEGIN )
                 p->state->lexer_saved_state = p->state->lexer_state;
             break;
 
@@ -414,6 +421,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
 
         case P_ERROR:
             p->events.error( p, ERROR_SYNTAX_ERROR );
+            *next_lexer_state = p->state->lexer_state; // Ignore the current character
             break;
 
         case P_TOKEN_BEGIN:

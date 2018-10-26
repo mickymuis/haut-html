@@ -1,0 +1,56 @@
+<html><body>
+<p attr1=&foo attr2='&foo' attr3="&foo"></p>
+<p attr1=&foo attr2='&foo bar' attr3="&foo bar"></p>
+<p attr1=foo&bar attr2='foo&bar' attr3="foo&bar"></p>
+<p attr1=&foo;bar attr2='&foo;bar' attr3="&foo;bar"></p>
+&abc this &is wrong & html &but; it &should;<br/>parse &fine
+<div>These & amper&sands &&& these &&&&&&& are& wrong &</div>
+</body></html>
+EXPECT
+ELEMENT OPEN TAG 1
+ELEMENT OPEN TAG 11
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "&foo"
+ARGUMENT attr2 "&foo"
+ARGUMENT attr3 "&foo"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "&foo"
+ARGUMENT attr2 "&foo bar"
+ARGUMENT attr3 "&foo bar"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "foo&bar"
+ARGUMENT attr2 "foo&bar"
+ARGUMENT attr3 "foo&bar"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "&foo;bar"
+ARGUMENT attr2 "&foo;bar"
+ARGUMENT attr3 "&foo;bar"
+ELEMENT CLOSE TAG 26
+INNERTEXT &abc
+INNERTEXT this
+INNERTEXT &is
+INNERTEXT wrong
+INNERTEXT &
+INNERTEXT html
+INNERTEXT &but;
+INNERTEXT it
+INNERTEXT &should;
+ELEMENT OPEN TAG 67
+INNERTEXT parse
+INNERTEXT &fine
+ELEMENT OPEN TAG 39
+INNERTEXT These
+INNERTEXT &
+INNERTEXT amper&sands
+INNERTEXT &&&
+INNERTEXT these
+INNERTEXT &&&&&&&
+INNERTEXT are&
+INNERTEXT wrong
+INNERTEXT &
+ELEMENT CLOSE TAG 39
+ELEMENT CLOSE TAG 11
+ELEMENT CLOSE TAG 1

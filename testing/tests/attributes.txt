@@ -1,0 +1,36 @@
+<html><body>
+<p attr1=foo attr2='foo' attr3="foo"></p>
+<p attr1='foo' attr2="foo" attr3=foo></p>
+<p attr1=foo bar attr2='foo bar' attr3="foo bar"></p>
+<p void1></p><p void2=></p><p void3= void4=""></p>
+</body></html>
+EXPECT
+ELEMENT OPEN TAG 1
+ELEMENT OPEN TAG 11
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "foo"
+ARGUMENT attr2 "foo"
+ARGUMENT attr3 "foo"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "foo"
+ARGUMENT attr2 "foo"
+ARGUMENT attr3 "foo"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT attr1 "foo"
+ARGUMENT bar VOID
+ARGUMENT attr2 "foo bar"
+ARGUMENT attr3 "foo bar"
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT void1 VOID
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT void2 VOID
+ELEMENT CLOSE TAG 26
+ELEMENT OPEN TAG 26
+ARGUMENT void3 "void4="""
+ELEMENT CLOSE TAG 26
+ELEMENT CLOSE TAG 11
+ELEMENT CLOSE TAG 1
