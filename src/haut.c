@@ -421,7 +421,20 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
 
         case P_ERROR:
             p->events.error( p, ERROR_SYNTAX_ERROR );
-            *next_lexer_state = p->state->lexer_state; // Ignore the current character
+            // For some syntax errors, we actively return the lexer to its previous state,
+            // in an attempt to continue the current token dispite the wrong syntax.
+            switch( p->state->lexer_state ) {
+                case L_ELEM:
+                case L_ELEM_WS:
+                case L_ATTR_KEY:
+                case L_ATTR_WS:
+                case L_ATTR_EQUALS:
+                case L_ATTR_VALUE:
+                    *next_lexer_state = p->state->lexer_state; // Ignore the current character
+                    break;
+                default:
+                    break;
+            }
             break;
 
         case P_TOKEN_BEGIN:

@@ -33,7 +33,7 @@ L_WHITESPACE, '&'       => { L_ENTITY }
 // Error recovery
 L_ERROR, **     => { L_ERROR }
 L_ERROR, '<'    => { L_ELEM_BEGIN }
-L_ERROR, '>'    => { L_ELEM_END }
+L_ERROR, '>'    => { L_WHITESPACE }
 
 // 
 // Section 2 - General elements
