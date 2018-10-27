@@ -1,0 +1,48 @@
+<html><body>
+<!-- Some comment -->
+Innertext
+<!- Wrong comment -->
+<p></p>
+<!--Comment1------------->
+Text1
+<!--Comment2-------------->
+Text2
+<!---->
+Text3
+<!->
+Text4
+<!--->Comment3-->
+Text5
+<!--<p>This is a comment too</p>-->
+Text6
+<!--[if IE]>
+Comment 4
+<![endif]-->
+Text6
+<!-- Comment - with - dashes -->
+Text7
+</body></html>
+EXPECT
+ELEMENT OPEN TAG 1
+ELEMENT OPEN TAG 11
+COMMENT  Some comment 
+INNERTEXT Innertext
+ELEMENT OPEN TAG 26
+ELEMENT CLOSE TAG 26
+COMMENT Comment1-----------
+INNERTEXT Text1
+COMMENT Comment2------------
+INNERTEXT Text2
+INNERTEXT Text3
+COMMENT ->Comment3
+INNERTEXT Text5
+COMMENT <p>This is a comment too</p>
+INNERTEXT Text6
+COMMENT [if IE]>
+Comment 4
+<![endif]
+INNERTEXT Text6
+COMMENT  Comment - with - dashes 
+INNERTEXT Text7
+ELEMENT CLOSE TAG 11
+ELEMENT CLOSE TAG 1

@@ -241,6 +241,7 @@ L_COMMENT_END_DASH1, '-'        => { L_COMMENT_END_DASH2 }
 
 L_COMMENT_END_DASH2, **         => { L_COMMENT }
 L_COMMENT_END_DASH2, '>'        => { L_ELEM_END }
+L_COMMENT_END_DASH2, '-'        => { L_COMMENT_END_DASH2 }
 
 //
 // Section 7 - CDATA

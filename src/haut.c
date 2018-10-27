@@ -339,7 +339,11 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
             break;
 
         case P_COMMENT:
-            p->events.comment( p, &p->state->token_ptr );
+            end_token( p, -2 ); // Exclude the trailing --
+            p->state->token_ptr.data++; // Exclude the leading -
+            // Double check the new token size
+            if( --p->state->token_ptr.size )
+                p->events.comment( p, &p->state->token_ptr );
             clear_current_token( p );
             break;
         
@@ -431,6 +435,9 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
                 case L_ATTR_EQUALS:
                 case L_ATTR_VALUE:
                     *next_lexer_state = p->state->lexer_state; // Ignore the current character
+                    break;
+                case L_SPECIAL_ELEM:
+                    *next_lexer_state = L_ELEM; // Treat as a regular element
                     break;
                 default:
                     break;
