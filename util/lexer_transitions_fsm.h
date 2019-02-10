@@ -325,6 +325,8 @@ L_SCRIPT_COMMENT_BEGIN,       '*'       => { L_SCRIPT_MULTI_COMMENT }
 
 L_SCRIPT_SINGLE_COMMENT,      **        => { L_SCRIPT_SINGLE_COMMENT }
 L_SCRIPT_SINGLE_COMMENT,      '\n'      => { L_SCRIPT }
+// The following is a questionable decision, however, it is encountered in wild html
+L_SCRIPT_SINGLE_COMMENT,      '<'       => { L_SCRIPT_LT }
 
 L_SCRIPT_MULTI_COMMENT,       **        => { L_SCRIPT_MULTI_COMMENT }
 L_SCRIPT_MULTI_COMMENT,       '*'       => { L_SCRIPT_MULTI_COMMENT_END }
