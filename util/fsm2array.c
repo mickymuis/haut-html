@@ -259,10 +259,13 @@ r:
         switch( input[o+2] ) {
             case 'n':
                 *numeric = '\n';
+                break;
             case 'r':
                 *numeric = '\r';
+                break;
             case 't':
                 *numeric = '\t';
+                break;
             default:
                 *numeric = input[2];
         }

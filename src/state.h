@@ -83,30 +83,35 @@
 #define L_CDATA_RBRACKET2               44
 
 #define L_ENTITY                        45
-#define L_ENTITY_END                    59
-#define L_ENTITY_END_DIRTY              60
+#define L_ENTITY_END                    46
+#define L_ENTITY_END_DIRTY              47
 
 /* Lexer states inside <script> elements */
 
-#define L_SCRIPT                                46
+#define L_SCRIPT                                48
 
-#define L_SCRIPT_SINGLE_QUOTE_STRING            47
-#define L_SCRIPT_SINGLE_QUOTE_STRING_ESCAPE     48
+#define L_SCRIPT_SINGLE_QUOTE_STRING            49
+#define L_SCRIPT_SINGLE_QUOTE_STRING_ESCAPE     50
 
-#define L_SCRIPT_DOUBLE_QUOTE_STRING            49
-#define L_SCRIPT_DOUBLE_QUOTE_STRING_ESCAPE     50
+#define L_SCRIPT_DOUBLE_QUOTE_STRING            51
+#define L_SCRIPT_DOUBLE_QUOTE_STRING_ESCAPE     52
 
-#define L_SCRIPT_LT                             51
-#define L_SCRIPT_SOLIDUS                        52
+#define L_SCRIPT_COMMENT_BEGIN                  53
+#define L_SCRIPT_SINGLE_COMMENT                 54
+#define L_SCRIPT_MULTI_COMMENT                  55
+#define L_SCRIPT_MULTI_COMMENT_END              56
 
-#define L_SCRIPT_S                              53
-#define L_SCRIPT_C                              54
-#define L_SCRIPT_R                              55
-#define L_SCRIPT_I                              56
-#define L_SCRIPT_P                              57
-#define L_SCRIPT_T                              58
+#define L_SCRIPT_LT                             57
+#define L_SCRIPT_SOLIDUS                        58
 
-#define L_N_STATES                      61
+#define L_SCRIPT_S                              59
+#define L_SCRIPT_C                              60
+#define L_SCRIPT_R                              61
+#define L_SCRIPT_I                              62
+#define L_SCRIPT_P                              63
+#define L_SCRIPT_T                              64
+
+#define L_N_STATES                      65
 
 /* Parser states */
 

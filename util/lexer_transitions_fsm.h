@@ -302,6 +302,7 @@ L_SCRIPT, **          => { L_SCRIPT }
 L_SCRIPT, '\''  => { L_SCRIPT_SINGLE_QUOTE_STRING }
 L_SCRIPT, '"'   => { L_SCRIPT_DOUBLE_QUOTE_STRING }
 L_SCRIPT, '<'   => { L_SCRIPT_LT }
+L_SCRIPT, '/'   => { L_SCRIPT_COMMENT_BEGIN }
 
 // Single-quoted string with escaping by the \ character
 L_SCRIPT_SINGLE_QUOTE_STRING, **        => { L_SCRIPT_SINGLE_QUOTE_STRING }
@@ -316,6 +317,21 @@ L_SCRIPT_DOUBLE_QUOTE_STRING, '\\'      => { L_SCRIPT_DOUBLE_QUOTE_STRING_ESCAPE
 L_SCRIPT_DOUBLE_QUOTE_STRING, '"'      => { L_SCRIPT }
 
 L_SCRIPT_DOUBLE_QUOTE_STRING_ESCAPE, ** => { L_SCRIPT_DOUBLE_QUOTE_STRING }
+
+// Javascript comments
+L_SCRIPT_COMMENT_BEGIN,       **        => { L_SCRIPT }
+L_SCRIPT_COMMENT_BEGIN,       '/'       => { L_SCRIPT_SINGLE_COMMENT }
+L_SCRIPT_COMMENT_BEGIN,       '*'       => { L_SCRIPT_MULTI_COMMENT }
+
+L_SCRIPT_SINGLE_COMMENT,      **        => { L_SCRIPT_SINGLE_COMMENT }
+L_SCRIPT_SINGLE_COMMENT,      '\n'      => { L_SCRIPT }
+
+L_SCRIPT_MULTI_COMMENT,       **        => { L_SCRIPT_MULTI_COMMENT }
+L_SCRIPT_MULTI_COMMENT,       '*'       => { L_SCRIPT_MULTI_COMMENT_END }
+
+L_SCRIPT_MULTI_COMMENT_END,   **        => { L_SCRIPT_MULTI_COMMENT }
+L_SCRIPT_MULTI_COMMENT_END,   '/'       => { L_SCRIPT }
+
 
 // Closing sequence for </script>
 
