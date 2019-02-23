@@ -234,6 +234,7 @@ begin_token( haut_t* p, int offs ) {
 static inline void
 end_token( haut_t* p, int offs ) {
     if( !p->state->in_token ) return;
+    //assert( p->state->in_token );
     set_token_chunk_end( p, offs );
     
     if( has_stored_token( p ) ) {
@@ -456,9 +457,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
             break;
         case P_ATTRIBUTE_KEY:
             end_token( p, 0 );
-            //p->state->attr_key_ptr = p->state->token_ptr;
-            p->state->attr_key_ptr.data = p->state->token_ptr.data;
-            p->state->attr_key_ptr.size = p->state->token_ptr.size;
+            p->state->attr_key_ptr = p->state->token_ptr;
             if( p->state->token_ptr.data == p->state->token_buffer.data ) {
                 store_attr_key( p );
             }
@@ -539,6 +538,8 @@ REREAD:
          * The parser's FSM responds on this transition by generating (a)
          * state(s) that semantically describes this transition */
         parser_state =parser_next_state( p->state->lexer_state, next_lexer_state );
+
+//        printf( "(%d,%d)\n", p->state->lexer_state, next_lexer_state );
 
         /* The parser FSM gives either zero, one or two new states that define serialized actions */
         for( int k =0; k < 2; k++ ) {

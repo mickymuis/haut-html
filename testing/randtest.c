@@ -3,8 +3,14 @@
  *
  * https://github.com/mickymuis/haut-html
  *
+ * This file is part of the Haut test-suite.
+ * The purpose of this test is to run large strings of random characters
+ *  through the parser in order to test its robustness against malformed input.
+ * In order to test a variety of conditions, each test set is prefixed
+ *  with a (partial) string of valid HTML.
+ *
  * Micky Faas <micky@edukitty.org>
- * Copyright 2017-2018
+ * Copyright 2017-2019
  * Leiden Institute of Advanced Computer Science, The Netherlands
  */
 
@@ -13,6 +19,30 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <haut/haut.h>
+
+const char* PREFIX[] = {
+    "<",
+    "<ht",
+    "<html",
+    "< ",
+    "<p ",
+    "<p attr",
+    "<p attr=",
+    "<p attr=value",
+    "<p attr='",
+    "<p attr=\"",
+    "<p>",
+    "<br/",
+    "<!",
+    "<!-",
+    "<!--",
+    "<script>",
+    "<!",
+    "<![",
+    "<![CDATA",
+    "<![CDATA[",
+    NULL
+};
 
 // Fill a chunk with random characters
 void
@@ -26,34 +56,44 @@ int
 main( int argc, char** argv ) {
 
     const int chunkMax =32;
-    const int n =10000000;
+    const int n =10000;
 
     char* chunk;
 
     haut_t parser;
     haut_init( &parser );
 
-    for( int i =0; i < n; i++ ) {
-        
-        // Create a chunk of a random length
-        int len = (rand() % chunkMax) + 1;
+    const char **prefix = PREFIX;
 
-        // Deliberately send a new pointer everytime!
-        chunk = malloc( len * sizeof(char) );
+    while( *prefix != NULL ) {
 
-        makeChunk( chunk, len );
+        // Test each prefix several times
+        for( int j =0; j < 10; j++ ) {
+            haut_init( &parser );
+            //printf( "%s", *prefix );
+            haut_parseChunk( &parser, *prefix, strlen( *prefix ) );
 
-        haut_parseChunk( &parser, chunk, len );
+            // Generate n chunks of random garbage
+            for( int i =0; i < n; i++ ) {
+                
+                // Create a chunk of a random length
+                int len = (rand() % chunkMax) + 1;
 
-        free( chunk );
+                // Deliberately send a new pointer every time!
+                chunk = malloc( len * sizeof(char) );
 
-/*        if( i % 1000 ) {
-            parser.state->lexer_state = rand() % 65;
-        }*/
+                makeChunk( chunk, len );
+                
+                haut_parseChunk( &parser, chunk, len );
 
+                free( chunk );
+
+            }
+            haut_destroy( &parser );
+        }
+        prefix++;
     }
 
-    haut_destroy( &parser );
 
     return 0;
 };
