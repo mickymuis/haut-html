@@ -10,6 +10,10 @@
 
 #include "string_util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Enumeration of all possible errors thrown by the error event */
 enum haut_error {
     ERROR_NONE          =0,
@@ -136,5 +140,8 @@ haut_enable( haut_t* p, haut_flag_t flag );
 void
 haut_disable( haut_t* p, haut_flag_t flag );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

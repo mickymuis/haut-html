@@ -18,6 +18,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * An non-mutable structure to safely store base pointer plus total length 
  */
@@ -88,6 +92,10 @@ strfragment_t strbuffer_toFragment( strbuffer_t* str );
 bool u32toUTF8( strbuffer_t* d, char32_t c );
 
 bool u32toUTF8_at( strbuffer_t* d, int offset, char32_t c );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
