@@ -34,21 +34,20 @@ expect( haut_t* p, const char* fmt, ... ) {
     /* First we compute the number of bytes we have to reserve for the output,
      * it can be at most as many bytes as the expectation */
     const char* expect =t->expect_buf + t->expect_ptr;
-    char* offset = strchr( expect, '\n' );
-    size_t len;
-    if( offset ) 
-        len = (size_t)(offset - expect);
-    else
-        len = t->expect_size - t->expect_ptr;
+   // char* offset = strchr( expect, '\n' );
 
     /* Fill the output buffer with the variable arguments send by the callee */
-    strbuffer_reserve( &t->output_buf, len+1 );
     char* output =t->output_buf.data;
-    vsnprintf( output, len+1, fmt, ap );
+    size_t len = vsnprintf( output, t->output_buf.capacity, fmt, ap );
     va_end( ap );
     
+    if( len > t->expect_size - t->expect_ptr ) {
+        fprintf( stderr, "Error\n-----\n Unexpected: %.*s\n", (int)len, output );
+        // We need to escape the parser's mainloop using a long jump
+        longjmp( t->return_on_mismatch, 1 );
+    }
     // If we mismatch the expectation and the output, we need to throw an error.
-    if( strncmp( expect, output, len ) != 0 ) {
+    else if( strncmp( expect, output, len ) != 0 ) {
 
         fprintf( stderr, "Error\n-----\n Expected: %.*s\n Got:      %s\n On line %d, column %d\n",
                  (int)len, expect, output, p->position.row, p->position.col );
@@ -56,7 +55,7 @@ expect( haut_t* p, const char* fmt, ... ) {
         longjmp( t->return_on_mismatch, 1 );
     }
     // Advance the pointer to point at the next expectation
-    t->expect_ptr += len+1;
+    t->expect_ptr += len;
 }
 
 /* Callback functions for the haut event handler below.
@@ -191,6 +190,7 @@ beginTest( test_t* t ) {
     p.events =TEST_EVENT_HANDLER;
 
     strbuffer_init( &t->output_buf );
+    strbuffer_reserve( &t->output_buf, t->expect_size );
 
     /* Set the buffer */
     haut_setInput( &p, (char*)t->input_buf, t->input_size );

@@ -14,6 +14,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "state.h"
 #include "entity.h"
 
@@ -206,6 +207,7 @@ set_token_chunk_begin( haut_t* p, int offs ) {
  */
 static inline void
 set_token_chunk_end( haut_t* p, int offs ) {
+    assert( p->input + p->position.offset >= p->state->token_chunk_ptr.data + offs );
     p->state->token_chunk_ptr.size = ((p->input + p->position.offset) - p->state->token_chunk_ptr.data) + offs;
     p->state->in_token =false;
 }
@@ -231,6 +233,7 @@ begin_token( haut_t* p, int offs ) {
  *  or storing it locally. This function is called whenever a token ends in the input. */
 static inline void
 end_token( haut_t* p, int offs ) {
+    if( !p->state->in_token ) return;
     set_token_chunk_end( p, offs );
     
     if( has_stored_token( p ) ) {
@@ -252,11 +255,10 @@ store_current_token( haut_t* p ) {
             &p->state->token_buffer,
             p->state->token_chunk_ptr.data,
             p->state->token_chunk_ptr.size );
-    p->state->token_ptr.data = p->state->token_buffer.data;
-    p->state->token_ptr.size = p->state->token_buffer.size;
+    p->state->token_ptr = strbuffer_toFragment( &p->state->token_buffer );
 }
 
-/** Make a local copy of the data pointed to by attr_key_buffer in @p 
+/** Make a local copy of the data pointed to by attr_key_ptr in @p 
  *  This function is called when parsing an attribute and the key that has been parsed,
  *  needs to be saved - either if the chunk ends or an entity is encountered. */
 static inline void
@@ -395,7 +397,7 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
                     p->state->token_buffer.size =p->state->entity_token_offset;
                 strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
                 strbuffer_free( &tmp );
-                p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
+                p->state->token_ptr = strbuffer_toFragment( &p->state->token_buffer );
                 set_token_chunk_begin( p, 1 );
             } else {
                 emit_error( p, ERROR_UNKNOWN_ENTITY );
@@ -407,11 +409,11 @@ dispatch_parser_action( haut_t* p, int state, int* next_lexer_state ) {
                 if( has_stored_token( p ) )
                     p->state->token_buffer.size =p->state->entity_token_offset;
                 strbuffer_append( &p->state->token_buffer, tmp.data, tmp.size );
-                p->state->token_ptr = strbuffer_to_fragment( p->state->token_buffer );
+                p->state->token_ptr = strbuffer_toFragment( &p->state->token_buffer );
                 set_token_chunk_begin( p, 1 );
             }
 
-            // Appearantly, due to errors in the HTML,
+            // Apparantly, due to errors in the HTML,
             // we have consumed one too many characters from the input stream
             if( entity == ENTITY_UNKNOWN || p->state->lexer_state == L_ENTITY_END_DIRTY ) {
                 set_token_chunk_begin( p, 0 );

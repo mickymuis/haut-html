@@ -29,6 +29,9 @@ build/%.o:	%.c $(HEADERS)
 		mkdir -p build
 		$(CC) $(CFLAGS) -c $< -o $@
 
+build/randtest:	randtest.c
+		$(CC) $(CFLAGS) randtest.c -o build/randtest $(LDFLAGS)
+
 tests:		build/runtest
 		build/runtest tests/*
 .PHONY: tests

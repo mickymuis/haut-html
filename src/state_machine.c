@@ -77,6 +77,9 @@ decode_tag( const char* str, size_t len ) {
     for( size_t i =0; i < len; i++ ) {
         // This is the dangerous part: we expect str[i] to be 
         // in the range [TAG__FIRST_CHAR, TAG__LAST_CHAR]
+        
+//        if( str[i] < TAG__FIRST_CHAR || str[i] > TAG__LAST_CHAR ) break;
+        
         state = _tag_transition[state][str[i]-TAG__FIRST_CHAR];
     }
     
@@ -95,6 +98,9 @@ decode_entity( const char* str, size_t len ) {
     for( size_t i =0; i < len; i++ ) {
         // This is the dangerous part: we expect str[i] to be 
         // in the range [ENTITY__FIRST_CHAR, ENTITY__LAST_CHAR]
+        
+//        if( str[i] < ENTITY__FIRST_CHAR || str[i] > ENTITY__LAST_CHAR ) break;
+
         state = _entity_transitions[state][str[i]-ENTITY__FIRST_CHAR];
         if( state & ENTITY_SUCCESS_BIT ) {
             if( i == len -1 )

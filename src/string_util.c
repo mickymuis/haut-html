@@ -17,6 +17,16 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
+void 
+strfragment_set( strfragment_t* str, const char* buf, size_t len ) {
+    str->data = buf; str->size = len;
+}
+
+void 
+strfragment_zero( strfragment_t* str) {
+    str->data = NULL; str->size = 0;
+}
+
 bool 
 strfragment_cmp(strfragment_t* str1, const char* str2) {
 	return ( strncmp( str1->data, str2, str1->size ) == 0 );
@@ -80,6 +90,10 @@ strbuffer_grow( strbuffer_t* d, size_t add ) {
 
 size_t
 strbuffer_reserve( strbuffer_t* d, size_t total ) {
+    // Try to detect possible wraparound of the total argument
+    if( (int64_t)total < 0 ) return d->capacity;
+    
+    // Reallocate if total exceeds capacity
     if( total + 1 > d->capacity ) {
         size_t newcap =((total + 1) / BLOCK_SIZE + 1) * BLOCK_SIZE;
         d->data =realloc( d->data, newcap );
@@ -115,7 +129,9 @@ strbuffer_copyFragment( strbuffer_t* d, size_t offset, strfragment_t* str ) {
 
 void 
 strbuffer_append( strbuffer_t* d, const char* str, size_t len ) {
-
+    // Try to detect possible wraparound of the len argument
+    if( (int64_t)len < 0 ) return;
+    
     strbuffer_grow( d, len );
     strncpy( d->data + d->size, str, len );
     d->size +=len;
@@ -130,10 +146,10 @@ strbuffer_swap( strbuffer_t* str1, strbuffer_t* str2 ) {
 }
 
 strfragment_t 
-strbuffer_to_fragment( strbuffer_t str ) {
+strbuffer_toFragment( strbuffer_t* str ) {
     strfragment_t frag;
-    frag.data =str.data;
-    frag.size =str.size;
+    frag.data =str->data;
+    frag.size =str->size;
     return frag;
 }
 

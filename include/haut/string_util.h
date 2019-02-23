@@ -26,6 +26,9 @@ typedef struct {
     size_t size;
 } strfragment_t;
 
+void strfragment_set( strfragment_t* str, const char* buf, size_t len );
+void strfragment_zero( strfragment_t* str);
+
 bool strfragment_cmp( strfragment_t* str1, const char* str2 );
 bool strfragment_ncmp( strfragment_t* str1, const char* str2, size_t len );
 bool strfragment_icmp( strfragment_t* str1, const char* str2 );
@@ -73,7 +76,7 @@ void strbuffer_append( strbuffer_t* d, const char* str, size_t len );
 
 void strbuffer_swap( strbuffer_t* str1, strbuffer_t* str2 );
 
-strfragment_t strbuffer_to_fragment( strbuffer_t str );
+strfragment_t strbuffer_toFragment( strbuffer_t* str );
 
 /** 
  * Convert the Unicode codepoint @c to an UTF-8 string.
